@@ -1,643 +1,531 @@
 # GitHub の使い方入門
 
-> GitHubの基本から実践的なTipsまでを網羅したリファレンスガイドです。
-
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com)
-[![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white)](https://git-scm.com)
+> これからGitHubを使い始める人のための入門レポートです。
+> 基本概念 → 日常の操作 → チーム開発 → 自動化・応用機能 の順に、覚えるべき用語とTipsを整理しています。
 
 ---
 
 ## 目次
 
-1. [GitHubとは](#1-githubとは)
-2. [基本用語集](#2-基本用語集)
-3. [リポジトリの操作](#3-リポジトリの操作)
-4. [ブランチとマージ](#4-ブランチとマージ)
-5. [プルリクエスト (PR)](#5-プルリクエスト-pr)
-6. [Issues（課題管理）](#6-issues課題管理)
-7. [GitHub Actions（CI/CD）](#7-github-actionscicd)
-8. [Projects（タスク管理）](#8-projectsタスク管理)
-9. [GitHub Pages](#9-github-pages)
-10. [セキュリティ機能](#10-セキュリティ機能)
-11. [コラボレーション機能](#11-コラボレーション機能)
-12. [便利なTips & ショートカット](#12-便利なtips--ショートカット)
-13. [よく使うGitコマンド早見表](#13-よく使うgitコマンド早見表)
+1. [GitHubとは — Gitとの違い](#1-githubとは--gitとの違い)
+2. [最初に覚える基本用語](#2-最初に覚える基本用語)
+3. [基本の流れ：編集 → コミット → プッシュ](#3-基本の流れ編集--コミット--プッシュ)
+4. [ブランチ — 並行作業の仕組み](#4-ブランチ--並行作業の仕組み)
+5. [プルリクエスト (Pull Request)](#5-プルリクエスト-pull-request)
+6. [Issue — 課題・タスクの管理](#6-issue--課題タスクの管理)
+7. [Fork — 他人のプロジェクトに貢献する](#7-fork--他人のプロジェクトに貢献する)
+8. [GitHub Actions — 自動化とCI/CD](#8-github-actions--自動化とcicd)
+9. [その他の主要機能](#9-その他の主要機能)
+10. [セキュリティとリポジトリ保護](#10-セキュリティとリポジトリ保護)
+11. [知っていると差がつくTips](#11-知っていると差がつくtips)
+12. [Gitコマンド早見表](#12-gitコマンド早見表)
+13. [困ったときの対処法](#13-困ったときの対処法)
 
 ---
 
-## 1. GitHubとは
+## 1. GitHubとは — Gitとの違い
 
-GitHubは **Gitリポジトリをホスティングするクラウドサービス** です。コードの管理だけでなく、チームでの共同開発・レビュー・CI/CD・プロジェクト管理まで一括して行えます。
+まず混同しやすい2つの言葉を区別します。
 
-- 個人の学習・ポートフォリオ公開から、世界最大のOSSプロジェクト（Linux Kernel・VSCode等）まで利用されている
-- Gitは **バージョン管理システム（VCS）** そのもの、GitHubはGitをホストする **プラットフォーム**（混同注意）
-- 競合サービス：GitLab / Bitbucket / Gitea（セルフホスト）
+| | 正体 | 役割 |
+|---|---|---|
+| **Git** | バージョン管理ソフトウェア | ファイルの変更履歴を記録する。自分のPC上で動く |
+| **GitHub** | Webサービス | Gitのリポジトリをインターネット上に置き、共有・公開・共同開発できるようにする |
 
----
+**Gitが「道具」、GitHubが「置き場所＋共同作業の場」** という関係です。GitHubがなくてもGitは使えますが、チーム開発やコードの公開にはGitHubのようなホスティングサービスがほぼ必須です（類似サービス：GitLab、Bitbucket）。
 
-## 2. 基本用語集
+GitHubはコード置き場にとどまらず、次の機能を提供します。
 
-| 用語 | 読み方 | 意味 |
-|------|--------|------|
-| **Repository (repo)** | リポジトリ | プロジェクトのファイルと履歴をまとめた場所 |
-| **Commit** | コミット | 変更を記録するスナップショット。メッセージを付ける |
-| **Branch** | ブランチ | コミット履歴の分岐。並行作業に使う |
-| **Merge** | マージ | ブランチの変更を別のブランチに統合すること |
-| **Clone** | クローン | リモートリポジトリをローカルにコピーする操作 |
-| **Fork** | フォーク | 他人のリポジトリを自分のアカウントにコピーすること |
-| **Pull Request (PR)** | プルリクエスト | ブランチの変更をレビューしてもらい、マージを依頼する仕組み |
-| **Issue** | イシュー | バグ報告・機能要望・タスクを管理する課題票 |
-| **Tag** | タグ | 特定のコミットに名前を付ける（バージョン管理に使う） |
-| **Release** | リリース | タグに説明・バイナリ等を付けて公開するもの |
-| **README** | リードミー | プロジェクトの説明を書くファイル（Markdown形式） |
-| **HEAD** | ヘッド | 現在チェックアウトしているコミットを示すポインタ |
-| **Origin** | オリジン | デフォルトのリモートリポジトリの名前 |
-| **Upstream** | アップストリーム | フォーク元の本家リポジトリを指すことが多い |
-| **Stash** | スタッシュ | 作業中の変更を一時退避する機能 |
-| **Rebase** | リベース | コミット履歴を整理・移植する操作 |
-| **Cherry-pick** | チェリーピック | 特定のコミットだけを別ブランチに適用する |
-| **.gitignore** | ギットイグノア | Gitが無視するファイル・フォルダのルールを書くファイル |
-| **Workflow** | ワークフロー | GitHub Actionsで実行する自動化の定義ファイル |
-| **Artifact** | アーティファクト | ActionsのジョブがCI中に生成したファイル（ビルド結果等） |
+- **コードレビュー**（Pull Request）
+- **課題管理**（Issues、Projects）
+- **自動テスト・自動デプロイ**（GitHub Actions）
+- **静的サイト公開**（GitHub Pages）
+- **脆弱性検知**（Dependabot、Code scanning）
 
 ---
 
-## 3. リポジトリの操作
+## 2. 最初に覚える基本用語
 
-### 3.1 リポジトリの作成
+### 必須の10語
 
-```bash
-# GitHub CLI を使う（最速）
-gh repo create my-project --public --clone
-
-# または GitHub Web UI で作成後にクローン
-git clone https://github.com/username/my-project.git
-cd my-project
-```
-
-### 3.2 基本的な作業の流れ
-
-```
-[ローカル編集] → git add → git commit → git push → [GitHub上にアップ]
-```
-
-```bash
-git add .                        # 全変更をステージング
-git add src/main.py              # 特定ファイルのみ
-git commit -m "feat: ログイン機能を追加"
-git push origin main             # main ブランチへ push
-```
-
-### 3.3 コミットメッセージの慣習（Conventional Commits）
-
-```
-<type>: <概要>
-
-feat:     新機能
-fix:      バグ修正
-docs:     ドキュメントのみの変更
-style:    コードの意味に影響しない変更（フォーマット等）
-refactor: リファクタリング
-test:     テストの追加・修正
-chore:    ビルド・補助ツールの変更
-```
-
-### 3.4 リモートとの同期
-
-```bash
-git fetch origin          # リモートの変更情報を取得（ローカルには反映しない）
-git pull origin main      # fetch + merge（リモートの変更をローカルに取り込む）
-git pull --rebase         # pull 時に rebase を使う（履歴が線形になる）
-```
-
----
-
-## 4. ブランチとマージ
-
-### 4.1 ブランチの基本
-
-```bash
-git branch feature/login          # ブランチを作成
-git checkout feature/login        # ブランチを切り替え
-git checkout -b feature/login     # 作成 + 切り替えを一度に
-
-# モダンな書き方（Git 2.23+）
-git switch -c feature/login       # 作成 + 切り替え
-git switch main                   # mainへ戻る
-```
-
-### 4.2 マージ
-
-```bash
-git checkout main
-git merge feature/login           # 通常マージ（マージコミットが生まれる）
-git merge --squash feature/login  # 全コミットを1つにまとめてマージ
-git merge --no-ff feature/login   # 必ずマージコミットを作る
-```
-
-### 4.3 マージ戦略の比較
-
-| 戦略 | コマンド | 特徴 |
-|------|---------|------|
-| **Merge commit** | `git merge` | 履歴が完全に残る。PRがどこから来たか分かる |
-| **Squash merge** | `--squash` | ブランチのコミットを1つに圧縮。履歴がきれいになる |
-| **Rebase merge** | `git rebase` | 線形履歴になる。コンフリクト解消が複雑になることも |
-
-### 4.4 コンフリクト解消
-
-```bash
-git merge feature/login
-# コンフリクト発生 → ファイルを手動で修正する
-# <<<<<<< HEAD
-# ここが現在のブランチの内容
-# =======
-# ここがマージ先の内容
-# >>>>>>> feature/login
-
-git add conflicted-file.txt
-git commit                        # マージコミットを作成
-```
-
-### 4.5 Rebase
-
-```bash
-git checkout feature/login
-git rebase main                   # main の最新コミットを起点に付け直す
-git rebase -i HEAD~3              # 直近3コミットをインタラクティブに整理
-```
-
-> ⚠️ **注意**: すでに push したブランチへの rebase は、他の開発者の履歴を壊す可能性がある。`git push --force-with-lease` を使うこと。
-
----
-
-## 5. プルリクエスト (PR)
-
-### 5.1 PR の作成
-
-```bash
-# GitHub CLI
-gh pr create --title "feat: ログイン機能" --body "## 概要\nOAuth2を使ったログインを実装"
-
-# Web UI でも作成可能
-```
-
-### 5.2 PR の種類と状態
-
-| 種別 | 説明 |
+| 用語 | 意味 |
 |------|------|
-| **Draft PR** | まだレビュー不要な WIP (Work In Progress) PR。マージ不可 |
-| **Ready for review** | レビュー可能な通常 PR |
-| **Approved** | レビュアーが承認した状態 |
-| **Changes requested** | 修正が必要とレビュアーが判断した状態 |
+| **リポジトリ (Repository)** | プロジェクト一式（ファイル＋全変更履歴）を入れる箱。「リポジトリ＝1プロジェクト」が基本 |
+| **コミット (Commit)** | 変更の記録。「いつ・誰が・何を・なぜ変えたか」が残るセーブポイント |
+| **プッシュ (Push)** | ローカル（自分のPC）のコミットをGitHubへ送ること |
+| **プル (Pull)** | GitHub上の最新の変更を自分のPCへ取り込むこと |
+| **クローン (Clone)** | GitHub上のリポジトリを丸ごと自分のPCへ複製すること（最初に1回やる） |
+| **ブランチ (Branch)** | 履歴の分岐。本流を壊さずに並行して作業するための仕組み |
+| **マージ (Merge)** | ブランチで行った変更を別のブランチへ統合すること |
+| **プルリクエスト (Pull Request / PR)** | 「この変更を取り込んでください」という提案。レビューを経てマージされる |
+| **イシュー (Issue)** | バグ報告・要望・タスクを記録する課題チケット |
+| **フォーク (Fork)** | 他人のリポジトリを自分のアカウントへコピーすること。OSSへの貢献の出発点 |
 
-### 5.3 レビュー機能
+### 次に覚える用語
 
-- **コメント (Comment)**: 質問・提案のみ
-- **Approve**: 変更に同意してマージを承認
-- **Request changes**: マージ前に修正が必要
-- **Suggested changes**: コード上で直接修正案を提示できる（1クリックで適用可能）
+| 用語 | 意味 |
+|------|------|
+| **リモート / ローカル** | GitHub上のリポジトリが「リモート」、自分のPC上が「ローカル」 |
+| **origin** | クローン元のリモートリポジトリに付く標準の別名 |
+| **main** | 標準のデフォルトブランチ名（以前は master が主流だった） |
+| **HEAD** | 「いま自分が見ている場所（コミット）」を指すポインタ |
+| **ステージング (git add)** | コミットに含める変更を選んでおく中間置き場（インデックスとも呼ぶ） |
+| **コンフリクト (Conflict)** | 同じ箇所を別々に変更してしまい、自動でマージできない状態 |
+| **タグ (Tag) / リリース (Release)** | 特定のコミットに付ける目印（v1.0.0 など）と、それに説明や配布物を添えた公開物 |
+| **.gitignore** | Gitに管理させないファイル（ビルド成果物、秘密情報など）を列挙する設定ファイル |
+| **README.md** | リポジトリの顔となる説明文書。トップページに自動表示される（このファイルです） |
+| **Markdown** | `#` で見出し、`-` で箇条書きなど、簡単な記号で文書を整形する記法。GitHubの標準 |
 
-### 5.4 PRのマージ方法
+---
 
-| 方法 | 説明 | 使いどころ |
-|------|------|-----------|
-| **Create a merge commit** | マージコミットを作成 | 履歴を完全に残したいとき |
-| **Squash and merge** | 全コミットを1つに圧縮 | 細かいコミットを整理したいとき |
-| **Rebase and merge** | 線形履歴にする | 常にきれいな履歴を保ちたいとき |
+## 3. 基本の流れ：編集 → コミット → プッシュ
 
-### 5.5 便利な機能
+### 3.1 初期設定（最初に1回だけ）
 
-```markdown
-<!-- PRの説明文でIssueを自動クローズ -->
-Closes #42
-Fixes #10
-Resolves #8
+```bash
+git config --global user.name "あなたの名前"
+git config --global user.email "you@example.com"
+```
 
-<!-- 特定ユーザーにレビュー依頼 -->
-@username お願いします
+この名前とメールアドレスがコミットの作者情報として記録されます。
 
-<!-- チェックボックス -->
-- [x] テスト追加
-- [ ] ドキュメント更新
+### 3.2 日常のサイクル
+
+```
+①ファイルを編集
+   ↓
+② git add      … コミットする変更を選ぶ（ステージング）
+   ↓
+③ git commit   … 変更をローカルの履歴に記録
+   ↓
+④ git push     … GitHubへアップロード
+```
+
+```bash
+git status                       # まず現状確認（迷ったらこれ）
+git add README.md                # 特定ファイルをステージング
+git add .                        # カレントディレクトリ以下の全変更
+git commit -m "fix: ログイン時のエラーを修正"
+git push                         # GitHubへ送信
+```
+
+> **ポイント**: `git commit` した時点ではまだ自分のPCの中だけです。`git push` して初めてGitHubに反映されます。
+
+### 3.3 良いコミットの作り方
+
+- **1コミット = 1つの意味のある変更**にする（「バグ修正」と「機能追加」を混ぜない）
+- メッセージは「何をしたか」より**「なぜしたか」**が伝わると価値が上がる
+- チームでよく使われる規約 **Conventional Commits** の接頭辞：
+
+| 接頭辞 | 用途 |
+|--------|------|
+| `feat:` | 新機能 |
+| `fix:` | バグ修正 |
+| `docs:` | ドキュメントのみの変更 |
+| `refactor:` | 動作を変えないコード整理 |
+| `test:` | テストの追加・修正 |
+| `chore:` | ビルド設定など雑務的な変更 |
+
+---
+
+## 4. ブランチ — 並行作業の仕組み
+
+### 4.1 なぜブランチを使うのか
+
+`main` ブランチを「常に動く状態」に保ったまま、新機能やバグ修正を**別の線路**で進めるためです。作業が完成してからmainに合流（マージ）させます。
+
+```
+main     ──●──●─────────●──→  （常に安定）
+              \         /
+feature        ●──●──●        （作業用ブランチ）
+```
+
+### 4.2 基本操作
+
+```bash
+git switch -c feature/login      # ブランチを作って切り替え（-c は create）
+git switch main                  # mainへ戻る
+git branch                       # ブランチ一覧（* が現在地）
+git branch -d feature/login      # マージ済みブランチを削除
+```
+
+> `git switch` はGit 2.23以降の推奨コマンドです。古い資料にある `git checkout -b` と同じことができます。
+
+### 4.3 マージとコンフリクト
+
+```bash
+git switch main
+git merge feature/login          # feature/login の変更を main へ統合
+```
+
+同じ行を双方で変更しているとコンフリクトが発生し、ファイルに次のような目印が挿入されます。
+
+```
+<<<<<<< HEAD
+現在のブランチ（main）側の内容
+=======
+取り込もうとしている（feature/login）側の内容
+>>>>>>> feature/login
+```
+
+**対処法**: 目印（`<<<<<<<` `=======` `>>>>>>>`）ごと削除して正しい内容に手で直し、`git add` → `git commit` で完了です。慌てる必要はありません。
+
+### 4.4 ブランチ名の慣習
+
+```
+feature/ログイン機能の追加  → feature/add-login
+fix/表示バグの修正          → fix/display-bug
+docs/READMEの更新           → docs/update-readme
 ```
 
 ---
 
-## 6. Issues（課題管理）
+## 5. プルリクエスト (Pull Request)
 
-### 6.1 Issueの構成要素
+GitHubでのチーム開発の中心となる機能です。「私のブランチの変更をmainに取り込んでください」という**提案＋レビューの場**です。
 
-| 要素 | 説明 |
+### 5.1 基本の流れ
+
+```
+①ブランチを作って作業・push
+   ↓
+②GitHub上で Pull Request を作成（変更の目的・内容を説明）
+   ↓
+③レビュアーがコードを確認し、コメント・修正依頼
+   ↓
+④指摘を修正して再push（PRに自動で反映される）
+   ↓
+⑤承認（Approve）されたらマージ
+```
+
+### 5.2 レビューの3つの応答
+
+| 応答 | 意味 |
 |------|------|
-| **Title** | 課題の件名 |
-| **Body** | 詳細説明（Markdown対応） |
-| **Label** | カテゴリタグ（bug / enhancement / documentation 等） |
-| **Milestone** | 目標バージョンや期限でグループ化 |
+| **Comment** | 質問や感想。賛否は示さない |
+| **Approve** | 「この変更で問題なし」。マージしてよいという承認 |
+| **Request changes** | 「修正が必要」。対応するまでマージを止める意思表示 |
+
+### 5.3 マージの3方式
+
+PRをマージするとき、GitHubでは3つの方式を選べます。
+
+| 方式 | 履歴の残り方 | 向いている場面 |
+|------|-------------|---------------|
+| **Create a merge commit** | ブランチの全コミット＋マージコミットが残る | 作業の経過を完全に残したい |
+| **Squash and merge** | ブランチの全コミットを**1つにまとめて**取り込む | 細かい試行錯誤のコミットを隠し、履歴を読みやすくしたい（チーム開発で人気） |
+| **Rebase and merge** | コミットをそのまま一直線に並べ直して取り込む | マージコミットを作らず直線的な履歴にしたい |
+
+### 5.4 知っておくと便利な機能
+
+- **Draft PR** — 「まだ作業中だけど方向性を見てほしい」段階のPR。マージボタンが無効化される
+- **Issueの自動クローズ** — PRの説明文に `Closes #12` と書くと、マージ時にIssue #12が自動で閉じる（`Fixes #12` / `Resolves #12` も同様）
+- **Suggested changes** — レビュアーが修正案をコードとして提示し、作者がワンクリックで取り込める
+- **タスクリスト** — 説明文に `- [ ] テスト追加` と書くとチェックボックスになり、進捗が可視化される
+
+---
+
+## 6. Issue — 課題・タスクの管理
+
+バグ報告・機能要望・質問・TODOを**1件＝1チケット**で管理する機能です。
+
+### 6.1 Issueに付けられる属性
+
+| 属性 | 役割 |
+|------|------|
+| **Label** | 分類タグ。`bug` `enhancement`（機能要望）`documentation` `good first issue`（初心者向け）などが標準で用意されている |
 | **Assignee** | 担当者 |
-| **Project** | 関連プロジェクトボード |
+| **Milestone** | 「v1.0まで」のような目標単位でIssueを束ねる |
+| **Projects** | カンバンボードなどに紐付けて進捗管理する |
 
-### 6.2 Issue テンプレート
-
-`.github/ISSUE_TEMPLATE/bug_report.md` を作成すると、Issue作成時に自動でフォームが表示される。
+### 6.2 書き方のコツ（バグ報告の場合）
 
 ```markdown
----
-name: バグ報告
-about: バグを報告する
-labels: bug
----
-
-## バグの内容
+## 起きていること
+ログインボタンを押すとエラー画面になる
 
 ## 再現手順
-1. 
-2. 
+1. トップページを開く
+2. メールアドレスとパスワードを入力
+3. ログインボタンを押す
 
 ## 期待する動作
-
-## 実際の動作
+マイページに遷移する
 
 ## 環境
-- OS:
-- バージョン:
+- macOS 15 / Safari 18
+- アプリのバージョン: v2.1.0
 ```
 
-### 6.3 Issue の検索フィルタ
+「再現手順」があるだけで対応スピードが大きく変わります。リポジトリに `.github/ISSUE_TEMPLATE/` を用意すると、この形式を全員に強制できます（Issueテンプレート機能）。
+
+### 6.3 検索フィルタの例
+
+GitHubのIssue一覧では検索構文が使えます。
 
 ```
-is:open is:issue label:bug         # 未解決のバグ
-assignee:username                  # 特定ユーザーのIssue
-milestone:"v1.0"                   # マイルストーン指定
-no:assignee                        # 担当者なし
+is:open label:bug          開いているバグ
+assignee:@me               自分が担当のもの
+no:assignee                担当者が未定のもの
+sort:updated-desc          更新が新しい順
 ```
 
 ---
 
-## 7. GitHub Actions（CI/CD）
+## 7. Fork — 他人のプロジェクトに貢献する
 
-### 7.1 概要
+書き込み権限のないリポジトリ（OSSなど）に変更を提案する標準手順です。
 
-GitHubリポジトリに `.github/workflows/*.yml` を置くだけで、**CI/CDパイプライン**を自動実行できる。
+```
+①Fork        … 相手のリポジトリを自分のアカウントへコピー
+②Clone       … 自分のFork を手元にクローン
+③ブランチを作って修正・push（push先は自分のFork）
+④Pull Request … 自分のFork → 本家リポジトリ へPRを出す
+```
 
-### 7.2 基本的な Workflow の例
+### 用語：origin と upstream
+
+Forkで作業するとき、リモートを2つ登録するのが慣習です。
+
+| 名前 | 指す先 |
+|------|--------|
+| `origin` | 自分のFork（push先） |
+| `upstream` | 本家リポジトリ（最新を取り込む元） |
+
+```bash
+git remote add upstream https://github.com/本家owner/repo.git
+git fetch upstream
+git merge upstream/main          # 本家の最新を自分の作業に取り込む
+```
+
+---
+
+## 8. GitHub Actions — 自動化とCI/CD
+
+リポジトリに設定ファイルを置くだけで、**push やPR をきっかけに処理を自動実行**できる機能です。テストの自動実行（CI）やデプロイの自動化（CD）に使われます。
+
+### 8.1 用語
+
+| 用語 | 意味 |
+|------|------|
+| **Workflow** | 自動化の定義一式。`.github/workflows/` 内のYAMLファイル1つ＝1ワークフロー |
+| **Job** | ワークフロー内の実行単位。仮想マシン上で動く |
+| **Step** | Job内の1つ1つの手順（コマンド実行やAction呼び出し） |
+| **Action** | 再利用可能な処理部品。`actions/checkout` など公式・コミュニティ製が多数ある |
+| **Runner** | Jobを実行する仮想マシン（`ubuntu-latest` など） |
+| **Secrets** | APIキーなどの秘密情報をコードに書かず安全に渡す仕組み（Settings → Secrets and variables で登録） |
+| **Artifact** | ジョブが生成したファイル（ビルド成果物やテストレポート）を保存・受け渡しする仕組み |
+
+### 8.2 最小のワークフロー例
+
+`.github/workflows/ci.yml`:
 
 ```yaml
-# .github/workflows/ci.yml
 name: CI
 
-on:
+on:                          # ──いつ動かすか（トリガー）
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4          # コードをチェックアウト
-      - uses: actions/setup-node@v4        # Node.js をセットアップ
+    runs-on: ubuntu-latest   # ──どこで動かすか
+    steps:                   # ──何をするか
+      - uses: actions/checkout@v4        # リポジトリの中身を取得
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: npm ci                         # 依存関係をインストール
-      - run: npm test                       # テスト実行
+          node-version: '22'
+      - run: npm ci                       # 依存関係をインストール
+      - run: npm test                     # テスト実行
 ```
 
-### 7.3 主要なトリガー (on:)
+このファイルをpushするだけで、以後 mainへのpushとPRのたびにテストが自動で走り、結果がPR画面に ✅ / ❌ で表示されます。
 
-| トリガー | 説明 |
-|----------|------|
-| `push` | push 時に実行 |
-| `pull_request` | PR 作成・更新時 |
-| `schedule` | cron 式で定期実行 |
-| `workflow_dispatch` | 手動実行（ボタンで起動） |
-| `release` | Release 作成時 |
+### 8.3 主なトリガー
 
-### 7.4 Secrets（機密情報）
+| トリガー | タイミング |
+|----------|-----------|
+| `push` | pushされたとき |
+| `pull_request` | PRが作成・更新されたとき |
+| `schedule` | cron式で定期実行（例: 毎朝9時） |
+| `workflow_dispatch` | 画面上のボタンから手動実行 |
+| `release` | リリースが公開されたとき |
 
-```yaml
-# リポジトリの Settings > Secrets に登録したキーを使う
-- run: deploy.sh
-  env:
-    API_KEY: ${{ secrets.API_KEY }}
-    DATABASE_URL: ${{ secrets.DATABASE_URL }}
-```
-
-### 7.5 よく使う公式 Actions
-
-| Action | 用途 |
-|--------|------|
-| `actions/checkout` | リポジトリのチェックアウト |
-| `actions/setup-node` | Node.js 環境セットアップ |
-| `actions/setup-python` | Python 環境セットアップ |
-| `actions/upload-artifact` | ビルド成果物の保存 |
-| `actions/cache` | 依存関係のキャッシュ |
-| `github/codeql-action` | コードの脆弱性スキャン |
+> **料金の目安**: パブリックリポジトリでは標準Runnerの利用は無料。プライベートリポジトリは無料枠（分数制限）を超えると課金されます。
 
 ---
 
-## 8. Projects（タスク管理）
+## 9. その他の主要機能
 
-GitHub Projects は **カンバンボード・テーブル・ロードマップ** ビューでタスクを管理できる機能。
-
-### 8.1 ビューの種類
-
-| ビュー | 用途 |
-|--------|------|
-| **Board（カンバン）** | Todo / In Progress / Done の列で管理 |
-| **Table** | スプレッドシート形式で一覧管理 |
-| **Roadmap** | タイムライン（ガントチャート）形式 |
-
-### 8.2 活用ポイント
-
-- Issue や PR をプロジェクトに追加すると自動で進捗が連携
-- カスタムフィールド（優先度・ストーリーポイント等）を追加できる
-- 自動化（Automation）でステータスを自動更新できる
+| 機能 | 概要 |
+|------|------|
+| **GitHub Pages** | リポジトリの内容を静的Webサイトとして無料公開。`https://ユーザー名.github.io/リポジトリ名/` で公開される。ポートフォリオやドキュメントに最適。Settings → Pages から有効化 |
+| **Releases** | タグにリリースノートや配布ファイル（バイナリ等）を添えて公開する機能。利用者は「Releases」ページから安定版をダウンロードできる |
+| **Gist** | 単一ファイル〜少数ファイルのコード断片を手軽に共有するミニリポジトリ。公開（Public）とURL限定（Secret）が選べる |
+| **Wiki** | リポジトリ付属のドキュメントページ。実体はGitリポジトリなのでcloneして編集することも可能 |
+| **Discussions** | Q&A・アイデア・雑談のためのフォーラム機能。「作業チケット」であるIssueと使い分ける |
+| **Projects** | Issue/PRを束ねるタスク管理ボード。カンバン（Board）・表（Table）・タイムライン（Roadmap）の3ビューを切り替えられる |
+| **Codespaces** | ブラウザから使えるクラウド開発環境（VS Codeベース）。環境構築なしで即コーディングできる。個人アカウントには無料枠あり |
+| **Copilot** | AIによるコード補完・チャット支援。エディタ統合のほかGitHub上でも利用できる |
 
 ---
 
-## 9. GitHub Pages
+## 10. セキュリティとリポジトリ保護
 
-**静的サイトを無料でホスティング**できる機能。ポートフォリオ・ドキュメントサイト・ブログに最適。
+### 10.1 自動検知機能
 
-### 9.1 有効化の手順
+| 機能 | 何をするか |
+|------|-----------|
+| **Dependabot alerts** | 依存ライブラリに既知の脆弱性があると警告 |
+| **Dependabot updates** | 依存ライブラリの更新PRを自動作成（`.github/dependabot.yml` で設定） |
+| **Secret scanning** | APIキーやトークンの誤コミットを検知して警告 |
+| **Code scanning (CodeQL)** | コードを静的解析して脆弱性パターンを検出。Securityタブから数クリックで有効化できる |
 
-1. `Settings` > `Pages` を開く
-2. Source を `Deploy from a branch` に設定
-3. ブランチ（`main` or `gh-pages`）とフォルダ（`/` or `/docs`）を選択
-4. `https://username.github.io/repo-name/` で公開される
+### 10.2 ブランチ保護（Branch protection / Rulesets）
 
-### 9.2 Jekyll との連携
+Settings → Branches（または Rules）で、mainブランチを事故から守るルールを設定できます。チーム開発ではほぼ必須です。
 
-GitHub Pages は Jekyll（静的サイトジェネレーター）に対応。`_config.yml` を置くだけで Markdown をサイトに変換できる。
+- **PRを必須にする** — mainへの直接pushを禁止
+- **レビュー承認を必須にする** — 承認なしではマージ不可
+- **CIの成功を必須にする** — テストが落ちているPRはマージ不可
+- **force pushの禁止** — 履歴の書き換えを防ぐ
 
-```yaml
-# _config.yml
-title: My Docs
-theme: minima
-```
+### 10.3 絶対に守るべきこと
 
----
-
-## 10. セキュリティ機能
-
-### 10.1 Dependabot
-
-依存ライブラリの脆弱性を自動検出し、**バージョンアップ PR を自動作成**する。
-
-```yaml
-# .github/dependabot.yml
-version: 2
-updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-```
-
-### 10.2 Code Scanning
-
-**CodeQL** を使ってコードの脆弱性を静的解析する。Actions Workflow として設定する。
-
-```yaml
-- uses: github/codeql-action/analyze@v3
-  with:
-    languages: ['javascript', 'python']
-```
-
-### 10.3 Secret Scanning
-
-コード内にAPIキーや認証情報が含まれていないか自動でスキャンする。検出するとアラートを通知。
-
-### 10.4 Branch Protection Rules
-
-`Settings` > `Branches` で設定できる。
-
-- **Require PR before merging**: 直接 push を禁止、PR 必須
-- **Require status checks**: CI 通過を必須にする
-- **Require review from Code Owners**: `CODEOWNERS` ファイルで指定した人のレビューを必須にする
-- **Require signed commits**: GPG署名を必須にする
+> ⚠️ **APIキー・パスワード・トークンをコミットしない。**
+> 一度pushした秘密情報は、履歴から消しても**漏えいしたものとして扱い、必ず無効化・再発行**してください。`.env` などの設定ファイルは最初に `.gitignore` へ追加し、CIで必要な値はGitHubの **Secrets** 機能を使います。
 
 ---
 
-## 11. コラボレーション機能
+## 11. 知っていると差がつくTips
 
-### 11.1 Collaborators と Team
-
-- **Collaborators**: 個人リポジトリに特定ユーザーを招待
-- **Organization**: 会社・チーム単位の管理
-  - **Team**: Org内でグループを作り、権限を一括管理
-  - **Role**: Read / Triage / Write / Maintain / Admin
-
-### 11.2 CODEOWNERS
-
-```
-# .github/CODEOWNERS
-*.js    @frontend-team
-*.py    @backend-team
-docs/   @documentation-team
-```
-
-指定したファイルが変更されたPRに、自動でレビュアーが追加される。
-
-### 11.3 Discussions
-
-Issue とは別に、QA・アイデア共有・アナウンスなどができる**フォーラム機能**。
-
-### 11.4 Wiki
-
-リポジトリに付属するドキュメントページ。git で管理はされないが、Markdown で記述できる。
-
-### 11.5 GitHub Gist
-
-**スニペット（コード断片）を手軽に共有**できるサービス。
-
-- Public Gist: 全体公開
-- Secret Gist: URLを知っている人だけアクセス可
-
----
-
-## 12. 便利なTips & ショートカット
-
-### 12.1 キーボードショートカット（Web UI）
+### 11.1 キーボードショートカット（GitHub上で押すだけ）
 
 | キー | 動作 |
 |------|------|
-| `T` | ファイル検索（fuzzy search） |
-| `B` | Git Blame を表示 |
-| `L` | 行番号へジャンプ |
-| `W` | ブランチ・タグの切り替え |
-| `.`（ドット） | **github.dev**（ブラウザ上のVSCode）を開く |
-| `>` | github.dev をライトモードで開く |
+| `.`（ピリオド） | **github.dev** が開き、ブラウザ上のVS Codeでリポジトリを閲覧・編集できる |
+| `T` | ファイル名のあいまい検索 |
+| `L` | （ファイル表示中）行番号へジャンプ |
+| `B` | （ファイル表示中）git blame（各行を最後に変更したコミット）を表示 |
+| `Y` | URLを「ブランチ名」から「コミットID」固定のURLに変換（リンク共有時に内容がずれない） |
 | `?` | ショートカット一覧を表示 |
-| `S` or `/` | 検索ボックスにフォーカス |
 
-### 12.2 GitHub CLI（`gh`コマンド）
+### 11.2 GitHub CLI（`gh` コマンド）
 
-```bash
-# インストール
-brew install gh
-gh auth login
-
-# リポジトリ操作
-gh repo create my-app --public     # リポジトリ作成
-gh repo clone owner/repo           # クローン
-gh repo view --web                 # ブラウザで開く
-
-# PR 操作
-gh pr create                       # PR 作成（対話式）
-gh pr list                         # PR 一覧
-gh pr checkout 42                  # PR #42 をチェックアウト
-gh pr merge --squash               # squash でマージ
-
-# Issue 操作
-gh issue create                    # Issue 作成
-gh issue list --label bug          # バグラベルの Issue 一覧
-gh issue close 10                  # Issue #10 をクローズ
-```
-
-### 12.3 Codespaces
-
-ブラウザ or VS Code からクラウド上の開発環境を起動できる。ローカル環境のセットアップ不要。
+ターミナルからGitHubを操作できる公式ツールです（macOS: `brew install gh`）。
 
 ```bash
-gh cs create --repo owner/repo     # Codespace を起動
-gh cs list                         # 一覧
+gh auth login                    # 初回ログイン
+gh repo create my-app --public   # リポジトリ作成
+gh repo view --web               # 今のリポジトリをブラウザで開く
+gh pr create                     # PRを対話形式で作成
+gh pr checkout 42                # PR #42 の内容を手元で確認
+gh issue list --label bug        # バグIssueの一覧
 ```
 
-### 12.4 GitHub Markdown の便利記法
+### 11.3 GitHub流Markdownの便利記法
 
 ````markdown
-<!-- タスクリスト -->
-- [x] 完了タスク
-- [ ] 未完了タスク
+- [ ] チェックボックス（Issue/PRでは進捗バーにも反映）
 
-<!-- 折りたたみ -->
 <details>
-<summary>詳細を見る</summary>
-ここに内容を書く
+<summary>クリックで開く折りたたみ</summary>
+長いログなどはここに入れると読みやすい
 </details>
 
-<!-- 注意書き（GFM Alerts） -->
 > [!NOTE]
-> 補足情報です
+> 補足情報。NOTE / TIP / IMPORTANT / WARNING / CAUTION の5種類があり、
+> 色付きの注意書きとして表示される
 
-> [!WARNING]
-> 注意が必要です
+#42              ← 同じリポジトリのIssue/PRへ自動リンク
+@ユーザー名       ← メンション（通知が飛ぶ）
 
-> [!IMPORTANT]
-> 重要な情報です
-
-<!-- メンション -->
-@username       <!-- ユーザー -->
-@org/team-name  <!-- チーム -->
-
-<!-- Issue/PR のリンク -->
-#42             <!-- 同リポジトリの Issue/PR -->
-owner/repo#42   <!-- 別リポジトリ -->
+```python        ← 言語名を書くとシンタックスハイライトが効く
+print("hello")
+```
 ````
 
-### 12.5 READMEバッジの例
+### 11.4 その他の小技
 
-```markdown
-[![CI](https://github.com/owner/repo/actions/workflows/ci.yml/badge.svg)](https://github.com/owner/repo/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![npm version](https://badge.fury.io/js/package-name.svg)](https://badge.fury.io/js/package-name)
-```
+- **`.gitignore` はプロジェクト開始時に置く** — リポジトリ作成画面で言語別テンプレートを選べる。後から追加しても、すでに追跡中のファイルは無視されない点に注意
+- **行への直リンク** — ファイル表示中に行番号をクリック（Shift+クリックで範囲選択）するとURLに `#L10-L20` が付き、その行を指すリンクを共有できる
+- **差分の比較URL** — `https://github.com/owner/repo/compare/v1.0...v2.0` でタグ間・ブランチ間の差分を一覧できる
+- **READMEバッジ** — [shields.io](https://shields.io) でCI状態やライセンスのバッジ画像を作り、READMEの見栄えと情報量を上げられる
+- **プロフィールREADME** — 自分のユーザー名と同名のリポジトリ（例: `mori0818/mori0818`）にREADMEを置くと、プロフィールページに表示される
 
-### 12.6 便利な URL パターン
+---
 
-```
-# 差分を見る
-https://github.com/owner/repo/compare/v1.0...v2.0
-
-# 特定コミットの差分
-https://github.com/owner/repo/commit/<sha>
-
-# ファイルの特定行にリンク
-https://github.com/owner/repo/blob/main/src/app.js#L42-L60
-
-# 最新リリースのダウンロード
-https://github.com/owner/repo/releases/latest
-```
-
-### 12.7 .gitignore のテンプレート
+## 12. Gitコマンド早見表
 
 ```bash
-# 言語・フレームワーク別のテンプレートを取得
-curl -L https://www.gitignore.io/api/node,macos,visualstudiocode > .gitignore
-```
+# ── 状態確認（迷ったらまずこれ）─────────────────
+git status                   # 変更状況
+git log --oneline --graph    # 履歴をコンパクトにグラフ表示
+git diff                     # まだaddしていない変更の差分
+git diff --staged            # addした変更の差分
 
-GitHub のリポジトリ作成時に言語を選択すると自動生成もされる。
+# ── 日常サイクル ────────────────────────────────
+git add <file>               # ステージング（. で全部）
+git commit -m "メッセージ"    # コミット
+git push                     # GitHubへ送信
+git pull                     # GitHubから取り込み
 
----
+# ── ブランチ ────────────────────────────────────
+git switch -c <name>         # ブランチを作って移動
+git switch <name>            # ブランチ移動
+git merge <name>             # 現在のブランチに <name> を統合
+git branch -d <name>         # マージ済みブランチを削除
 
-## 13. よく使うGitコマンド早見表
+# ── 取り消し ────────────────────────────────────
+git restore <file>           # ファイルの変更を捨てる（add前）⚠️元に戻せない
+git restore --staged <file>  # addを取り消す（変更自体は残る）
+git commit --amend           # 直前のコミットを修正（push前のみ推奨）
+git revert <コミットID>       # 指定コミットの「打ち消しコミット」を作る（push後はこちら）
+git reset --hard HEAD~1      # 直前のコミットを変更ごと消す ⚠️push前のみ・要注意
 
-```bash
-# 初期設定
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
-git config --global core.editor "code --wait"   # VSCode をエディタに
+# ── 一時退避 ────────────────────────────────────
+git stash                    # 作業中の変更を一時退避
+git stash pop                # 退避した変更を戻す
 
-# リポジトリ
-git init                          # ローカルで初期化
-git clone <url>                   # クローン
-git remote -v                     # リモートを確認
-git remote add upstream <url>     # upstream を追加（フォーク時）
+# ── リモート ────────────────────────────────────
+git clone <URL>              # リポジトリを複製
+git remote -v                # 登録済みリモートの確認
+git fetch                    # リモートの情報だけ取得（作業ツリーは変えない）
 
-# 状態確認
-git status                        # 変更状態を確認
-git log --oneline --graph         # 履歴をグラフ表示
-git diff                          # 差分を確認（unstaged）
-git diff --staged                 # ステージ済みの差分
-
-# 変更の保存
-git add <file>                    # ステージング
-git add -p                        # 変更を部分的にステージング
-git commit -m "message"           # コミット
-git commit --amend                # 直前のコミットを修正（未pushのみ）
-
-# ブランチ
-git branch -a                     # 全ブランチ一覧
-git branch -d feature/xxx         # ブランチ削除（マージ済みのみ）
-git branch -D feature/xxx         # ブランチ強制削除
-
-# 取り消し・戻す
-git restore <file>                # ファイルの変更を破棄（unstaged）
-git restore --staged <file>       # ステージングを取り消す
-git reset HEAD~1                  # 直前のコミットを取り消す（変更は残す）
-git reset --hard HEAD~1           # 直前のコミットと変更を全て取り消す
-git revert <sha>                  # コミットを打ち消すコミットを作る（履歴に残る）
-
-# Stash
-git stash                         # 現在の変更を退避
-git stash pop                     # 退避した変更を復元
-git stash list                    # stash の一覧
-
-# タグ
-git tag v1.0.0                    # タグを付ける
-git tag -a v1.0.0 -m "Release"   # アノテーション付きタグ
-git push origin --tags            # タグを push
-
-# その他
-git cherry-pick <sha>             # 特定コミットを適用
-git bisect start                  # バグ混入コミットを二分探索で特定
-git blame <file>                  # 各行のコミット・作者を表示
-git reflog                        # HEAD の移動履歴（ほぼ何でも復元可）
+# ── タグ ────────────────────────────────────────
+git tag -a v1.0.0 -m "初版"  # 注釈付きタグを作成
+git push origin v1.0.0       # タグをGitHubへ送信
 ```
 
 ---
 
-## 覚えておくべき重要ポイント
+## 13. 困ったときの対処法
 
-1. **`git reflog` はほぼ何でも戻せる** — 誤って reset や rebase しても慌てない
-2. **force push は `--force-with-lease` を使う** — 他の人の push を上書きしないよう安全に
-3. **PRはこまめに作る** — 大きなPRよりも小さなPRの方がレビューされやすい
-4. **Issueを先に作ってからコードを書く** — 意図・背景が残りチームと認識合わせができる
-5. **デフォルトブランチを保護する** — Branch Protection Rules で main への直push を禁止
-6. **Secretsをコードに書かない** — `.env` は必ず `.gitignore` に追加し、GitHub Secrets を使う
+| 困りごと | 対処 |
+|----------|------|
+| コミットメッセージを打ち間違えた（push前） | `git commit --amend -m "正しいメッセージ"` |
+| addするファイルを間違えた | `git restore --staged <file>` |
+| pushしたコミットを取り消したい | `git revert <コミットID>`（履歴を書き換えず安全に打ち消す） |
+| pushが拒否された（rejected） | 誰かが先にpushしている。`git pull` してから再push |
+| 間違えてreset/rebaseして履歴を失った気がする | `git reflog` でHEADの移動履歴を確認。コミットしてあったものはほぼ復元できる |
+| 秘密情報をpushしてしまった | **即座にそのキーを無効化・再発行**。履歴の削除だけでは不十分 |
+| force pushが必要になった | `git push --force-with-lease` を使う（他人のpushを誤って消さない安全版） |
+
+### 覚えておくべき5つの原則
+
+1. **困ったらまず `git status`** — 現在地がわかれば大半は解決できる
+2. **コミットはこまめに、push前なら何でもやり直せる** — `reflog` という保険もある
+3. **push済みの履歴は書き換えない** — 取り消しは `revert` で
+4. **mainは保護し、変更はPR経由で** — レビューとCIが品質を守る
+5. **秘密情報はコードに書かない** — `.gitignore` と Secrets を使う
 
 ---
 
-*このガイドは随時更新されます。不明な点は [GitHub Docs](https://docs.github.com) も参照してください。*
+## 参考リンク
+
+- [GitHub Docs（公式・日本語あり）](https://docs.github.com/ja)
+- [Pro Git Book（Git公式の無料書籍・日本語版）](https://git-scm.com/book/ja/v2)
+- [GitHub Skills（公式のハンズオン学習）](https://skills.github.com/)
+
+*このレポートは学習用に作成されたものです。*
